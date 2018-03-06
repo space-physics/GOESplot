@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-install_requires = ['python-dateutil','numpy','imageio','scikit-image']
+install_requires = ['python-dateutil','numpy','imageio']
 tests_require = ['nose','coveralls']
 # %%
 from setuptools import setup,find_packages
