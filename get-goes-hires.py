@@ -21,9 +21,10 @@ def get_hires(host:str, ftpdir:str, flist:list, odir:Path, clobber:bool=False):
 
         for f in flist:
             parts= f.split('/')
-            parents = parts[:-1]
+            rpath = parts[-2]
             rfn = parts[-1]
-            F.cwd('/'.join(parents))
+            if F.pwd().split('/')[-1] != rpath:
+                F.cwd(rpath)
 
             ofn = odir / f
             if not clobber: # can't check remote file size on this
