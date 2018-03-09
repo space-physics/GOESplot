@@ -29,11 +29,11 @@ Preview (3 hour cadence)
 
 1. Get `GOES preview imagedata <https://www.ncdc.noaa.gov/gibbs/>`_ with parallel download::
 
-        python download-goes.py goesnum start stop outdir
+        python get-goes-preview.py goesnum start stop outdir
 
    example: download IR from GOES-13 2018-01-01 to 2018-01-02 to ``~/data/goes13``::
 
-        python download-goes.py 13 IR 2018-01-01T00 2018-01-03T00 ~/data/goes13
+        python get-goes-preview.py 13 IR 2018-01-01T00 2018-01-03T00 ~/data/goes13
 
 These are updated every 3 hours.
 For science use, you'll want the `full fidelity GOES data <https://www.class.ncdc.noaa.gov/saa/products/welcome>`_ updated on minutely timescale.

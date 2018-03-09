@@ -4,6 +4,8 @@ import imageio
 import numpy as np
 from pathlib import Path
 from typing import Tuple
+from dateutil.parser import parse
+import concurrent.futures
 
 stem = 'GOES_EAST_' # FIXME: make auto per satellite
 
@@ -30,7 +32,25 @@ def datetimerange(start:datetime, stop:datetime, step:timedelta) -> list:
     return [start + i*step for i in range((stop-start) // step)]
 
 
-def get_goes(t:datetime, outdir:Path, goes:int, mode:str):
+def get_preview(odir:Path, start:str, stop:str, goessat:int, goesmode:str):
+    odir = Path(odir).expanduser()
+    odir.mkdir(parents=True,exist_ok=True)
+
+    start, stop = parse(start), parse(stop)
+# %% GOES 3-hour previews
+    tgoes = datetimerange(start, stop, timedelta(hours=3))
+    print('downloading',len(tgoes),'files to',odir)
+
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as exe:
+        future_file = {exe.submit(dl_goes, t, odir, goessat, goesmode): t for t in tgoes}
+        for f in concurrent.futures.as_completed(future_file):
+            t = future_file[f]
+
+    print()
+
+
+def dl_goes(t:datetime, outdir:Path, goes:int, mode:str):
     """download GOES file for this time
     https://www.ncdc.noaa.gov/gibbs/image/GOE-13/IR/2017-08-21-06
     """
