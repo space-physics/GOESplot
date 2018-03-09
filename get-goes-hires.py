@@ -9,6 +9,10 @@
 from time import sleep
 from pathlib import Path
 import ftplib
+try:
+    import netCDF4
+except ImportError:
+    netCDF4 = None
 
 def get_hires(host:str, ftpdir:str, flist:list, odir:Path, clobber:bool=False):
     """download hi-res GOES data over FTP"""
@@ -27,17 +31,22 @@ def get_hires(host:str, ftpdir:str, flist:list, odir:Path, clobber:bool=False):
                 F.cwd(rpath)
 
             ofn = odir / f
-            if not clobber: # can't check remote file size on this
-                if ofn.is_file() and ofn.stat().st_size > 1000:
-                    print('SKIPPING existing', ofn)
-                    continue
+            if not clobber: # check NetCDF4 files to see if we can read them or if they are corrupted by aborted download.
+                if ofn.is_file() and ofn.suffix=='.nc':
+                    try:
+                        if netCDF4:
+                            with netCDF4.Dataset(ofn,'r') as n:
+                                if n.variables:
+                                    continue
+                    except Exception:
+                        pass
 
-                print(ofn)
-                ofn.parent.mkdir(parents=True,exist_ok=True)
-                with ofn.open('wb') as h:
-                    F.retrbinary(f'RETR {rfn}', h.write)
+            print(ofn)
+            ofn.parent.mkdir(parents=True,exist_ok=True)
+            with ofn.open('wb') as h:
+                F.retrbinary(f'RETR {rfn}', h.write)
 
-                sleep(1) # anti-leech
+            sleep(1) # anti-leech
 
 
 def parse_email(txtfn:Path):

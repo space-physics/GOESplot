@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 install_requires = ['python-dateutil','numpy','imageio']
-tests_require = ['nose','coveralls']
+tests_require = ['pytest','nose','coveralls']
 # %%
 from setuptools import setup,find_packages
 
@@ -13,7 +13,8 @@ setup(name='GOES_quickplot',
       install_requires=install_requires,
       tests_require=tests_require,
       extras_require={'tests':tests_require,
-                      'plots':['cartopy','matplotlib'],},
+                      'plots':['cartopy','matplotlib'],
+                      'io':['netCDF4']},
       python_requires='>=3.6',
 	  )
 
