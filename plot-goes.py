@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from pathlib import Path
-from matplotlib.pyplot import draw,pause
+from matplotlib.pyplot import draw,pause,show
 #
 import goes_quickplot as gq
 from goes_quickplot.plots import plotgoes
@@ -21,7 +21,9 @@ def plothires(flist:list):
     for f in flist:
         img = gq.loadgoes_hires(f)
 
-        plotgoes(img, f)
+        plotgoes(img, f, downsample=8)
+
+        show()
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

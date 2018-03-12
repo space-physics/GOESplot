@@ -40,7 +40,7 @@ def loadgoes_preview(fn:Path, wld:Path) -> np.ndarray:
     loads and modifies GOES image
     """
 
-    img = imageio.imread(str(fn))
+    img = imageio.imread(fn)
 
     assert img.ndim==3 and img.shape[2] == 3,'unexpected GOES image format'
 

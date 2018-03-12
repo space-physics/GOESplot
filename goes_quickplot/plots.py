@@ -2,11 +2,12 @@ from pathlib import Path
 from matplotlib.pyplot import figure
 import cartopy
 import xarray
+import skimage.transform
 
 # WGS84 is the default, just calling it out explicity so somene doesn't wonder.
 GREF = cartopy.crs.PlateCarree()#globe=cartopy.crs.Globe(ellipse='WGS84')
 
-def plotgoes(img:xarray.DataArray, fn:Path, fignum:int=None):
+def plotgoes(img:xarray.DataArray, fn:Path, fignum:int=None, downsample:int=None):
     """plot GOES data on map coordinates"""
     #hsv = rgb_to_hsv(d)
 
@@ -35,6 +36,16 @@ def plotgoes(img:xarray.DataArray, fn:Path, fignum:int=None):
         ax.plot(l[0], l[1], 'bo', markersize=7, transform=GREF)
         ax.annotate(l[2], xy = (l[0], l[1]), xytext = (3, 3), textcoords = 'offset points')
 
-    ax.imshow(img, origin='upper',
-              extent=[img.lon[0], img.lon[-1], img.lat[0], img.lat[-1]],
-              transform=GREF)
+    lat = img.lat; lon=img.lon
+
+    if downsample:
+        img = skimage.transform.resize(img.values,
+                                (img.shape[0]//downsample, img.shape[1]//downsample),
+                                 mode='constant',cval=255,
+                                 preserve_range=True).astype(img.dtype)
+
+        lon = lon[::downsample,::downsample]
+        lat = lat[::downsample,::downsample]
+
+    ax.pcolormesh(lon,lat, img,
+                  transform=GREF)
