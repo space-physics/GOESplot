@@ -4,6 +4,7 @@ import numpy as np
 from pathlib import Path
 from typing import Tuple
 import xarray
+from numpy.ma import masked_where # pcolormesh doesn't like NaN
 try:
     import netCDF4
 except ImportError:
@@ -61,11 +62,18 @@ def loadgoes_hires(fn:Path) -> np.ndarray:
 
     with netCDF4.Dataset(fn,'r') as f:
         t = datetime.utcfromtimestamp(f['time'][:])
+        lon = np.flipud(f['lon'][:])
+        lat = np.flipud(f['lat'][:])
+#        lon = f['lon'][:]
+#        lat = f['lat'][:]
 
-        img = xarray.DataArray(np.squeeze(f['data']),
+        mask = lon>180
+
+        img = xarray.DataArray(np.flipud(np.squeeze(f['data'])),
+        #img = xarray.DataArray(np.squeeze(f['data']),
                                dims=['x','y'],
-                               coords={'lon':(['x','y'],f['lon']),
-                                       'lat':(['x','y'],f['lat'])},
-                               attrs={'time':t})
+                               coords={'lon':(['x','y'], lon),
+                                       'lat':(['x','y'], lat)},
+                               attrs={'time':t, 'mask':mask})
 
     return img

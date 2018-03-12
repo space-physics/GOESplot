@@ -3,18 +3,24 @@ from matplotlib.pyplot import figure
 import cartopy
 import xarray
 import skimage.transform
+import numpy as np
+from numpy.ma import masked_where
 
 # WGS84 is the default, just calling it out explicity so somene doesn't wonder.
 GREF = cartopy.crs.PlateCarree()#globe=cartopy.crs.Globe(ellipse='WGS84')
 
-def plotgoes(img:xarray.DataArray, fn:Path, fignum:int=None, downsample:int=None):
-    """plot GOES data on map coordinates"""
+def plotgoes(img:xarray.DataArray, fn:Path, downsample:int=None):
+    """plot GOES data on map coordinates
+    https://stackoverflow.com/questions/36228363/dealing-with-masked-coordinate-arrays-in-pcolormesh?rq=1
+    """
+    PTYPE='contour'
+
     #hsv = rgb_to_hsv(d)
 
-    if fignum:
-        figure(fignum).clf()
+    fg = figure(1, figsize=(15,10))
+    fg.clf()
 
-    ax = figure(fignum, figsize=(15,10)).gca(projection=GREF)
+    ax = fg.gca(projection=GREF)
 
     ax.set_title(fn.name)
 
@@ -39,13 +45,37 @@ def plotgoes(img:xarray.DataArray, fn:Path, fignum:int=None, downsample:int=None
     lat = img.lat; lon=img.lon
 
     if downsample:
-        img = skimage.transform.resize(img.values,
-                                (img.shape[0]//downsample, img.shape[1]//downsample),
-                                 mode='constant',cval=255,
-                                 preserve_range=True).astype(img.dtype)
-
+#        img = skimage.transform.resize(img.values,
+#                                (img.shape[0]//downsample, img.shape[1]//downsample),
+#                                 mode='constant',cval=255,
+#                                 preserve_range=True).astype(img.dtype)
+        I = img[::downsample,::downsample]
         lon = lon[::downsample,::downsample]
         lat = lat[::downsample,::downsample]
+        mask = img.attrs['mask'][::downsample,::downsample]
 
-    ax.pcolormesh(lon,lat, img,
+    h = ax.pcolormesh(lon,lat,
+                  masked_where(mask,I),
                   transform=GREF)
+    fg.colorbar(h,ax=ax)
+# %%
+    if lon.ndim==2:
+        fg = figure(2, figsize=(12,8))
+        fg.clf()
+
+        ax = fg.subplots(1,2)
+        ax[0].set_title('latitude')
+        ax[1].set_title('longitude')
+
+        if PTYPE=='pcolor':
+            h = ax[0].pcolormesh(masked_where(mask,lat))
+            fg.colorbar(h,ax=ax[0])
+            h = ax[1].pcolormesh(masked_where(mask,lon))
+            fg.colorbar(h,ax=ax[1])
+        elif PTYPE=='contour':
+            h = ax[0].contour(masked_where(mask,lat))
+            ax[0].clabel(h,fmt='%0.1f')
+            h = ax[1].contour(masked_where(mask,lon))
+            ax[1].clabel(h,fmt='%0.1f')
+
+        fg.suptitle(fn)
