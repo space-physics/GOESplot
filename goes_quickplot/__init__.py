@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
-import urllib.request
 import imageio
 import numpy as np
 from pathlib import Path
 from typing import Tuple
-from dateutil.parser import parse
-import concurrent.futures
+import xarray
+try:
+    import netCDF4
+except ImportError:
+    netCDF4 = None
+
 
 stem = 'GOES_EAST_' # FIXME: make auto per satellite
 
@@ -32,51 +35,37 @@ def datetimerange(start:datetime, stop:datetime, step:timedelta) -> list:
     return [start + i*step for i in range((stop-start) // step)]
 
 
-def get_preview(odir:Path, start:str, stop:str, goessat:int, goesmode:str):
-    odir = Path(odir).expanduser()
-    odir.mkdir(parents=True,exist_ok=True)
-
-    start, stop = parse(start), parse(stop)
-# %% GOES 3-hour previews
-    tgoes = datetimerange(start, stop, timedelta(hours=3))
-    print('downloading',len(tgoes),'files to',odir)
-
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as exe:
-        future_file = {exe.submit(dl_goes, t, odir, goessat, goesmode): t for t in tgoes}
-        for f in concurrent.futures.as_completed(future_file):
-            t = future_file[f]
-
-    print()
-
-
-def dl_goes(t:datetime, outdir:Path, goes:int, mode:str):
-    """download GOES file for this time
-    https://www.ncdc.noaa.gov/gibbs/image/GOE-13/IR/2017-08-21-06
+def loadgoes_preview(fn:Path, wld:Path) -> np.ndarray:
     """
-    STEM = 'https://www.ncdc.noaa.gov/gibbs/image/GOE-'
-    outdir = Path(outdir).expanduser()
-
-    dgoes = f'{t.year}-{t.month:02d}-{t.day:02d}-{t.hour:02d}'
-
-    fn = outdir / f"goes{goes:d}-{mode}-{dgoes}.jpg"
-
-    if fn.is_file(): # no clobber
-        return
-
-    url = (f'{STEM}{goes}/{mode}/' + dgoes)
-
-    print(fn, end='\r')
-    urllib.request.urlretrieve(url, fn)
-
-
-def loadgoes(fn:Path) -> np.ndarray:
-    """
-    loads and modifies GOES image for plotting
+    loads and modifies GOES image
     """
 
     img = imageio.imread(str(fn))
 
     assert img.ndim==3 and img.shape[2] == 3,'unexpected GOES image format'
+
+    lat, lon = wld2mesh(wld, fn.stem.split('-')[1].upper(), img.shape[:2])
+
+    img = xarray.DataArray(img, dims=['lon','lat'],
+                           coords={'lon':lon, 'lat':lat})
+
+    return img
+
+
+def loadgoes_hires(fn:Path) -> np.ndarray:
+    """
+    loads and modifies GOES data
+    """
+    if netCDF4 is None:
+        raise ImportError('netCDF4 needed for hires data.   pip install netcdf4')
+
+    with netCDF4.Dataset(fn,'r') as f:
+        t = datetime.utcfromtimestamp(f['time'][:])
+
+        img = xarray.DataArray(np.squeeze(f['data']),
+                               dims=['x','y'],
+                               coords={'lon':(['x','y'],f['lon']),
+                                       'lat':(['x','y'],f['lat'])},
+                               attrs={'time':t})
 
     return img

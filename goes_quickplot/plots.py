@@ -1,12 +1,12 @@
 from pathlib import Path
 from matplotlib.pyplot import figure
 import cartopy
-import numpy as np
+import xarray
 
 # WGS84 is the default, just calling it out explicity so somene doesn't wonder.
 GREF = cartopy.crs.PlateCarree()#globe=cartopy.crs.Globe(ellipse='WGS84')
 
-def plotgoes(img:np.ndarray, fn:Path, lat:list, lon:list, fignum:int=None):
+def plotgoes(img:xarray.DataArray, fn:Path, fignum:int=None):
     """plot GOES data on map coordinates"""
     #hsv = rgb_to_hsv(d)
 
@@ -36,5 +36,5 @@ def plotgoes(img:np.ndarray, fn:Path, lat:list, lon:list, fignum:int=None):
         ax.annotate(l[2], xy = (l[0], l[1]), xytext = (3, 3), textcoords = 'offset points')
 
     ax.imshow(img, origin='upper',
-              extent=[lon[0],lon[-1],lat[0],lat[-1]],
+              extent=[img.lon[0], img.lon[-1], img.lat[0], img.lat[-1]],
               transform=GREF)
