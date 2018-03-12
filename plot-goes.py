@@ -16,12 +16,12 @@ def plotpreview(flist:list, wld:Path):
         draw(); pause(0.2)
 
 
-def plothires(flist:list):
+def plothires(flist:list, downsample:int, verbose:bool=False):
     """plot hi resoliution data"""
     for f in flist:
         img = gq.loadgoes_hires(f)
 
-        plotgoes(img, f, downsample=8)
+        plotgoes(img, f, downsample, verbose)
 
         show()
 
@@ -30,7 +30,9 @@ if __name__ == '__main__':
     p = ArgumentParser()
     p.add_argument('datadir',help='directory of GOES image data to read')
     p.add_argument('pat',help='file glob pattern  preview:*.jpg  hires:*.nc',nargs='?', default='*.jpg')
+    p.add_argument('-d','--downsample',help='downsample factor',type=int)
     p.add_argument('-wld',help='.wld path',default='data/')
+    p.add_argument('-v','--verbose',action='store_true')
     p = p.parse_args()
 
     datadir = Path(p.datadir).expanduser()
@@ -47,6 +49,6 @@ if __name__ == '__main__':
     if p.pat=='*.jpg':
         plotpreview(flist, p.wld)
     elif p.pat=='*.nc':
-        plothires(flist)
+        plothires(flist, p.downsample, p.verbose)
     else:
         raise ValueError(f'unknown data type {p.pat}')

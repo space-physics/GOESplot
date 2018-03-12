@@ -9,7 +9,7 @@ from numpy.ma import masked_where
 # WGS84 is the default, just calling it out explicity so somene doesn't wonder.
 GREF = cartopy.crs.PlateCarree()#globe=cartopy.crs.Globe(ellipse='WGS84')
 
-def plotgoes(img:xarray.DataArray, fn:Path, downsample:int=None):
+def plotgoes(img:xarray.DataArray, fn:Path, downsample:int=None, verbose:bool=False):
     """plot GOES data on map coordinates
     https://stackoverflow.com/questions/36228363/dealing-with-masked-coordinate-arrays-in-pcolormesh?rq=1
     """
@@ -54,12 +54,13 @@ def plotgoes(img:xarray.DataArray, fn:Path, downsample:int=None):
         lat = lat[::downsample,::downsample]
         mask = img.attrs['mask'][::downsample,::downsample]
 
-    h = ax.pcolormesh(lon,lat,
+    h = ax.pcolor(masked_where(mask,lon),
+                  masked_where(mask,lat),
                   masked_where(mask,I),
                   transform=GREF)
     fg.colorbar(h,ax=ax)
 # %%
-    if lon.ndim==2:
+    if lon.ndim==2 and verbose:
         fg = figure(2, figsize=(12,8))
         fg.clf()
 
