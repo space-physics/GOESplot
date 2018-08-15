@@ -7,16 +7,20 @@
 4. Load and process that text file with this program.
 """
 import goes_quickplot.io as gqio
+from argparse import ArgumentParser
 
 
-if __name__ == '__main__':
-    from argparse import ArgumentParser
+def main():
     p = ArgumentParser()
-    p.add_argument('txtfn',help='text file copied from CLASS email')
-    p.add_argument('outdir',help='place to write the files')
-    p.add_argument('-host',help='FTP host',default='ftp.class.ngdc.noaa.gov')
+    p.add_argument('txtfn', help='text file copied from CLASS email')
+    p.add_argument('outdir', help='place to write the files')
+    p.add_argument('-host', help='FTP host', default='ftp.class.ngdc.noaa.gov')
     p = p.parse_args()
 
     ftpdir, flist = gqio.parse_email(p.txtfn)
 
     gqio.get_hires(p.host, ftpdir, flist, p.outdir)
+
+
+if __name__ == '__main__':
+    main()

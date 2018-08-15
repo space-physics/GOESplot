@@ -8,16 +8,20 @@ This program is for downloading:
 * 3-hour JPG low-resolution previews
 """
 import goes_quickplot
+from argparse import ArgumentParser
 
 
-if __name__ == '__main__':
-    from argparse import ArgumentParser
+def main():
     p = ArgumentParser()
-    p.add_argument('goessat',help='number of GOES satellite e.g. 13',type=int)
-    p.add_argument('goesmode',help='instrument [IR,WV,VS]')
-    p.add_argument('start',help='time to start downloading data')
-    p.add_argument('stop',help='time to stop downloading data')
-    p.add_argument('outdir',help='directory to write data')
+    p.add_argument('goessat', help='number of GOES satellite e.g. 13', type=int)
+    p.add_argument('goesmode', help='instrument [IR,WV,VS]')
+    p.add_argument('start', help='time to start downloading data')
+    p.add_argument('stop', help='time to stop downloading data')
+    p.add_argument('outdir', help='directory to write data')
     p = p.parse_args()
 
     goes_quickplot.get_preview(p.outdir, p.start, p.stop, p.goessat, p.goesmode)
+
+
+if __name__ == '__main__':
+    main()
