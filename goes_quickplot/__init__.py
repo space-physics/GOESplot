@@ -4,7 +4,6 @@ import numpy as np
 from pathlib import Path
 from typing import Tuple
 import xarray
-from numpy.ma import masked_where  # noqa: F401
 try:
     import netCDF4
 except ImportError:
@@ -36,7 +35,21 @@ def datetimerange(start: datetime, stop: datetime, step: timedelta) -> list:
     return [start + i*step for i in range((stop-start) // step)]
 
 
-def loadgoes_preview(fn: Path, wld: Path) -> np.ndarray:
+def load(fn: Path) -> xarray.DataArray:
+    """ for now this is single file at a time, but is trivial to extend to multi-files"""
+    if fn.suffix == '.jpg':
+        img = loadpreview(fn)
+    elif fn.suffix == '.nc':
+        img = loadhires(fn)
+    else:
+        raise ValueError(f'unknown data type {fn}')
+
+    img.attrs['filename'] = str(fn)
+
+    return img
+
+
+def loadpreview(fn: Path, wld: Path) -> xarray.DataArray:
     """
     loads and modifies GOES image
     """
@@ -47,13 +60,13 @@ def loadgoes_preview(fn: Path, wld: Path) -> np.ndarray:
 
     lat, lon = wld2mesh(wld, fn.stem.split('-')[1].upper(), img.shape[:2])
 
-    img = xarray.DataArray(img, dims=['lon', 'lat'],
-                           coords={'lon': lon, 'lat': lat})
+    img = xarray.DataArray(img, dims=['lon', 'lat', 'color'],
+                           coords={'lon': lon, 'lat': lat, 'color': ['R', 'G', 'B']})
 
     return img
 
 
-def loadgoes_hires(fn: Path) -> np.ndarray:
+def loadhires(fn: Path) -> xarray.DataArray:
     """
     loads and modifies GOES data
     """

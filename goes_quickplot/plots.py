@@ -1,4 +1,3 @@
-from pathlib import Path
 from matplotlib.pyplot import figure
 import cartopy
 import xarray
@@ -8,9 +7,12 @@ from numpy.ma import masked_where
 
 # WGS84 is the default, just calling it out explicity so somene doesn't wonder.
 GREF = cartopy.crs.PlateCarree()  # globe=cartopy.crs.Globe(ellipse='WGS84')
+# GREF = cartopy.crs.Stereographic()
+# GREF = cartopy.crs.Orthographic()
+# GREF = cartopy.crs.Geostationary()
 
 
-def plotgoes(img: xarray.DataArray, fn: Path, downsample: int=None, verbose: bool=False):
+def plotgoes(img: xarray.DataArray, downsample: int=None, verbose: bool=False):
     """plot GOES data on map coordinates
     https://stackoverflow.com/questions/36228363/dealing-with-masked-coordinate-arrays-in-pcolormesh?rq=1
     """
@@ -23,7 +25,7 @@ def plotgoes(img: xarray.DataArray, fn: Path, downsample: int=None, verbose: boo
 
     ax = fg.gca(projection=GREF)
 
-    ax.set_title(fn.name)
+    ax.set_title(img.filename)
 
     ax.add_feature(cartopy.feature.COASTLINE, linewidth=0.5, linestyle=':')
     ax.add_feature(cartopy.feature.NaturalEarthFeature('cultural', 'admin_1_states_provinces',
@@ -40,7 +42,7 @@ def plotgoes(img: xarray.DataArray, fn: Path, downsample: int=None, verbose: boo
               ]
     if 0:
         for l in labels:
-            ax.plot(l[0], l[1], 'bo', markersize=7, transform=GREF)
+            ax.plot(l[0], l[1], 'bo', markersize=7)
             ax.annotate(l[2], xy=(l[0], l[1]), xytext=(3, 3), textcoords='offset points')
 
     lat = img.lat
@@ -51,16 +53,27 @@ def plotgoes(img: xarray.DataArray, fn: Path, downsample: int=None, verbose: boo
         #                                (img.shape[0]//downsample, img.shape[1]//downsample),
         #                                 mode='constant',cval=255,
         #                                 preserve_range=True).astype(img.dtype)
-        img = img[::downsample, ::downsample]
-        lon = lon[::downsample, ::downsample]
-        lat = lat[::downsample, ::downsample]
-        mask = img.attrs['mask'][::downsample, ::downsample]
+        if 'color' not in img.coords:
+            img = img[::downsample, ::downsample]
+            lon = lon[::downsample, ::downsample]
+            lat = lat[::downsample, ::downsample]
+            mask = img.attrs['mask'][::downsample, ::downsample]
+        else:
+            img = img[::downsample, ::downsample]
+            lon = lon[::downsample]
+            lat = lat[::downsample]
+    else:
+        mask = img.attrs['mask']
 
     h = ax.pcolor(masked_where(mask, lon),
                   masked_where(mask, lat),
-                  masked_where(mask, img),
-                  transform=GREF)
+                  masked_where(mask, img))
     fg.colorbar(h, ax=ax)
+
+    # ax.gridlines()
+    # ax.set_xticks(range(-140,-20,20), crs=GREF)
+    # ax.set_yticks(range(0,60,10), crs=GREF)
+
 # %%
     if lon.ndim == 2 and verbose:
         fg = figure(2, figsize=(12, 8))
@@ -81,4 +94,4 @@ def plotgoes(img: xarray.DataArray, fn: Path, downsample: int=None, verbose: boo
             h = ax[1].contour(masked_where(mask, lon))
             ax[1].clabel(h, fmt='%0.1f')
 
-        fg.suptitle(fn)
+        fg.suptitle(img.filename)
