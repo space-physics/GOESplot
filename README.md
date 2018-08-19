@@ -1,12 +1,15 @@
 [![Build Status](https://travis-ci.com/scivision/goes-quickplot.svg?branch=master)](https://travis-ci.com/scivision/goes-quickplot)
 [![Coverage Status](https://coveralls.io/repos/github/scivision/goes-quickplot/badge.svg?branch=master)](https://coveralls.io/github/scivision/goes-quickplot?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/0e066xr36xt9rfbb?svg=true)](https://ci.appveyor.com/project/scivision/goes-quickplot)
+[![PyPi version](https://img.shields.io/pypi/pyversions/goes-quickplot.svg)](https://pypi.python.org/pypi/goes-quickplot)
+[![PyPi formats](https://img.shields.io/pypi/format/goes-quickplot.svg)](https://pypi.python.org/pypi/goes-quickplot)
+[![PyPi Download stats](http://pepy.tech/badge/goes-quickplot)](http://pepy.tech/project/goes-quickplot)
 
 # GOES Quickplot
 
 Quick Python script to download and plot GOES satellite preview and hi-resolution data by date/time.
 
-![Lowtran7 absorption](tests/goes13-IR-2017-07-13-12.jpg)
+![goes-quickplot7 absorption](tests/goes13-IR-2017-07-13-12.jpg)
 
 ## Install
 
