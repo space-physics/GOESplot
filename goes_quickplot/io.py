@@ -42,16 +42,16 @@ def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> Tuple[np.ndarray, n
     return lat, lon
 
 
-def load(fn: Path, wld: Path=None) -> xarray.DataArray:
+def load(fn: Path, downsample: int=None, wld: Path=None) -> xarray.DataArray:
     """ for now this is single file at a time, but is trivial to extend to multi-files"""
     if fn.suffix == '.jpg':
         img = loadpreview(fn, wld)
     elif fn.suffix == '.nc':
-        img = loadhires(fn)
+        img = loadhires(fn, downsample)
     else:
         raise ValueError(f'unknown data type {fn}')
 
-    img.attrs['filename'] = str(fn)
+    img.attrs['filename'] = fn.name
 
     return img
 
@@ -73,7 +73,7 @@ def loadpreview(fn: Path, wld: Path=None) -> xarray.DataArray:
     return img
 
 
-def loadhires(fn: Path) -> xarray.DataArray:
+def loadhires(fn: Path, downsample: int=None) -> xarray.DataArray:
     """
     loads and modifies GOES data
     """
@@ -82,13 +82,12 @@ def loadhires(fn: Path) -> xarray.DataArray:
 
     with netCDF4.Dataset(fn, 'r') as f:
         t = datetime.utcfromtimestamp(f['time'][:])
-        lon = np.flipud(f['lon'][:])
-        lat = np.flipud(f['lat'][:])
+        lon = np.flipud(f['lon'][::downsample, ::downsample])
+        lat = np.flipud(f['lat'][::downsample, ::downsample])
 
         mask = lon > 180
 
-        img = xarray.DataArray(np.flipud(np.squeeze(f['data'])),
-                               # img = xarray.DataArray(np.squeeze(f['data']),
+        img = xarray.DataArray(np.flipud(f['data'][0, ::downsample, ::downsample]),
                                dims=['x', 'y'],
                                coords={'lon': (['x', 'y'], lon),
                                        'lat': (['x', 'y'], lat)},

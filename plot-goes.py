@@ -34,9 +34,9 @@ def main():
         print(f'{len(flist)} files found in {datadir}')
 
     for fn in flist:
-        img = gq.load(fn, p.wld)
+        img = gq.load(fn, p.downsample, p.wld)
 
-        plotgoes(img, p.downsample, p.verbose)
+        plotgoes(img, p.verbose)
 
         show()
 
