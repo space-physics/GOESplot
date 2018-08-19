@@ -1,6 +1,4 @@
 language: python
-sudo: required
-dist: xenial
 group: travis_latest
 
 git:
@@ -9,13 +7,12 @@ git:
 
 python:
 - 3.6
-- 3.7
 
 os:
 - linux
 
 
-install: pip install -e .[tests]
+install: pip install -e .[tests,io]
 
 script:
 - pytest -rsv

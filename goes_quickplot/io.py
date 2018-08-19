@@ -1,16 +1,100 @@
-from time import sleep
+from datetime import datetime, timedelta
+import imageio
+import numpy as np
 from pathlib import Path
+from typing import Tuple, Optional
+import xarray
+from time import sleep
 from dateutil.parser import parse
 import concurrent.futures
-import urllib.request
+import requests
 import ftplib
-from datetime import datetime, timedelta
+import logging
 try:
     import netCDF4
 except ImportError:
     netCDF4 = None
-#
-from . import datetimerange
+
+STEM = 'GOES_EAST_'  # FIXME: make auto per satellite
+
+R = Path(__file__).resolve().parents[1] / 'data'
+
+
+def datetimerange(start: datetime, stop: datetime, step: timedelta) -> list:
+    return [start + i*step for i in range((stop-start) // step)]
+
+
+def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> Tuple[np.ndarray, np.ndarray]:
+    """converts .wld to lat/lon mesh for Cartopy/Matplotlib plots
+    assumes the .wld file is EPSG:4326 coordinates (WGS84)
+    """
+    wdir = R if wdir is None else Path(wdir).expanduser()
+
+    fn = wdir / (STEM + inst + '.wld')
+
+    wld = np.loadtxt(fn)
+
+    ny, nx = nxy
+
+    lat = np.arange(wld[5]-wld[3] + ny*wld[3], wld[5]-wld[3], -wld[3])
+    lon = np.arange(wld[4], wld[4]+nx*wld[0], wld[0])
+
+    return lat, lon
+
+
+def load(fn: Path, wld: Path=None) -> xarray.DataArray:
+    """ for now this is single file at a time, but is trivial to extend to multi-files"""
+    if fn.suffix == '.jpg':
+        img = loadpreview(fn, wld)
+    elif fn.suffix == '.nc':
+        img = loadhires(fn)
+    else:
+        raise ValueError(f'unknown data type {fn}')
+
+    img.attrs['filename'] = str(fn)
+
+    return img
+
+
+def loadpreview(fn: Path, wld: Path=None) -> xarray.DataArray:
+    """
+    loads and modifies GOES image
+    """
+
+    img = imageio.imread(fn)
+
+    assert img.ndim == 3 and img.shape[2] == 3, 'unexpected GOES image format'
+
+    lat, lon = wld2mesh(wld, fn.stem.split('-')[1].upper(), img.shape[:2])
+
+    img = xarray.DataArray(img, dims=['lon', 'lat', 'color'],
+                           coords={'lon': lon, 'lat': lat, 'color': ['R', 'G', 'B']})
+
+    return img
+
+
+def loadhires(fn: Path) -> xarray.DataArray:
+    """
+    loads and modifies GOES data
+    """
+    if netCDF4 is None:
+        raise ImportError('netCDF4 needed for hires data.   pip install netcdf4')
+
+    with netCDF4.Dataset(fn, 'r') as f:
+        t = datetime.utcfromtimestamp(f['time'][:])
+        lon = np.flipud(f['lon'][:])
+        lat = np.flipud(f['lat'][:])
+
+        mask = lon > 180
+
+        img = xarray.DataArray(np.flipud(np.squeeze(f['data'])),
+                               # img = xarray.DataArray(np.squeeze(f['data']),
+                               dims=['x', 'y'],
+                               coords={'lon': (['x', 'y'], lon),
+                                       'lat': (['x', 'y'], lat)},
+                               attrs={'time': t, 'mask': mask})
+
+    return img
 
 
 def get_hires(host: str, ftpdir: str, flist: list, odir: Path, clobber: bool=False):
@@ -96,11 +180,22 @@ def dl_goes(t: datetime, outdir: Path, goes: int, mode: str):
     dgoes = f'{t.year}-{t.month:02d}-{t.day:02d}-{t.hour:02d}'
 
     fn = outdir / f"goes{goes:d}-{mode}-{dgoes}.jpg"
-
-    if fn.is_file():  # no clobber
-        return
-
     url = (f'{STEM}{goes}/{mode}/' + dgoes)
 
-    print(fn, end='\r')
-    urllib.request.urlretrieve(url, fn)
+    urlretrieve(url, fn)
+
+
+def urlretrieve(url: str, fn: Path, overwrite: bool=False):
+    if not overwrite and fn.is_file() and fn.stat().st_size > 10000:
+        print(f'SKIPPED {fn}')
+        return
+# %% prepare to download
+    R = requests.head(url, allow_redirects=True, timeout=10)
+    if R.status_code != 200:
+        logging.error(f'{url} not found. \n HTTP ERROR {R.status_code}')
+        return
+# %% download
+    print(f'downloading {int(R.headers["Content-Length"])//1000000} MBytes:  {fn.name}')
+    R = requests.get(url, allow_redirects=True, timeout=10)
+    with fn.open('wb') as f:
+        f.write(R.content)
