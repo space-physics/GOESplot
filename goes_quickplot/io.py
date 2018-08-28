@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import imageio
 import numpy as np
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 import xarray
 from time import sleep
 from dateutil.parser import parse
@@ -20,7 +20,10 @@ STEM = 'GOES_EAST_'  # FIXME: make auto per satellite
 R = Path(__file__).resolve().parents[1] / 'data'
 
 
-def datetimerange(start: datetime, stop: datetime, step: timedelta) -> list:
+def datetimerange(start: datetime, stop: datetime, step: timedelta) -> List[datetime]:
+    """
+    generates range of datetime start,stop,step just like range() for datetime
+    """
     return [start + i*step for i in range((stop-start) // step)]
 
 
