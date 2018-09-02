@@ -9,8 +9,8 @@ preview .jpg data
 from pathlib import Path
 from matplotlib.pyplot import show  # draw, pause,
 from argparse import ArgumentParser
-import goes_quickplot as gq
-from goes_quickplot.plots import plotgoes
+import goesutils as gq
+from goesutils.plots import plotgoes
 
 
 def main():

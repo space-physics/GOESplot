@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import goes_quickplot as gq
+import goesutils as gq
 import pytest
 from pathlib import Path
 
@@ -20,4 +20,4 @@ def test_load_hires():
 
 
 if __name__ == '__main__':
-    pytest.main(['-xv', __file__])
+    pytest.main(['-xrsv', __file__])

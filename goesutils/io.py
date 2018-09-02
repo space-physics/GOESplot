@@ -99,7 +99,8 @@ def loadhires(fn: Path, downsample: int=None) -> xarray.DataArray:
     return img
 
 
-def get_hires(host: str, ftpdir: str, flist: list, odir: Path, clobber: bool=False):
+def get_hires(host: str, ftpdir: str, flist: List[str],
+              odir: Path, clobber: bool=False):
     """download hi-res GOES data over FTP"""
 
     odir = Path(odir).expanduser()
@@ -134,7 +135,7 @@ def get_hires(host: str, ftpdir: str, flist: list, odir: Path, clobber: bool=Fal
             sleep(0.5)  # anti-leech
 
 
-def parse_email(txtfn: Path):
+def parse_email(txtfn: Path) -> Tuple[str, List[str]]:
     """Parse GOES hi-res file list from email"""
     txtfn = Path(txtfn).expanduser()
 
@@ -188,6 +189,9 @@ def dl_goes(t: datetime, outdir: Path, goes: int, mode: str):
 
 
 def urlretrieve(url: str, fn: Path, overwrite: bool=False):
+    """
+    the way urlretrieve should be with timeout
+    """
     if not overwrite and fn.is_file() and fn.stat().st_size > 10000:
         print(f'SKIPPED {fn}')
         return

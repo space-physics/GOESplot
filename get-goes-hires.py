@@ -6,7 +6,7 @@
    Copy from the "cd ..." command through all the "get ..." commands
 4. Load and process that text file with this program.
 """
-import goes_quickplot.io as gqio
+import goesutils
 from argparse import ArgumentParser
 
 
@@ -17,9 +17,9 @@ def main():
     p.add_argument('-host', help='FTP host', default='ftp.class.ngdc.noaa.gov')
     p = p.parse_args()
 
-    ftpdir, flist = gqio.parse_email(p.txtfn)
+    ftpdir, flist = goesutils.parse_email(p.txtfn)
 
-    gqio.get_hires(p.host, ftpdir, flist, p.outdir)
+    goesutils.get_hires(p.host, ftpdir, flist, p.outdir)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ which gives ~ 100 MB/minute of data!
 This program is for downloading:
 * 3-hour JPG low-resolution previews
 """
-import goes_quickplot
+import goesutils
 from argparse import ArgumentParser
 
 
@@ -20,7 +20,7 @@ def main():
     p.add_argument('outdir', help='directory to write data')
     p = p.parse_args()
 
-    goes_quickplot.get_preview(p.outdir, p.start, p.stop, p.goessat, p.goesmode)
+    goesutils.get_preview(p.outdir, p.start, p.stop, p.goessat, p.goesmode)
 
 
 if __name__ == '__main__':

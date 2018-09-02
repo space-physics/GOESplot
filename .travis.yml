@@ -12,12 +12,14 @@ os:
 - linux
 
 
-install: pip install -e .[tests,io]
+install:
+- pip install -e .[test,io]
+- if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then pip install -e .[cov]; fi
 
 script:
 - pytest -rsv
-- flake8
-- mypy . --ignore-missing-imports
+- if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then flake8; fi
+- if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then mypy . --ignore-missing-imports; fi
 
 after_success:
 - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
