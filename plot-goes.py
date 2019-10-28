@@ -17,8 +17,7 @@ def main():
 
     p = ArgumentParser()
     p.add_argument('datadir', help='directory of GOES image data to read')
-    p.add_argument('pat', help='file glob pattern  preview:*.jpg  hires:*.nc', nargs='?',
-                   default=['*.jpg', '*.nc'])
+    p.add_argument('pat', help='file glob pattern  preview:*.jpg  hires:*.nc', nargs='?', default=['*.jpg', '*.nc'])
     p.add_argument('-d', '--downsample', help='downsample factor', type=int, default=8)
     p.add_argument('-wld', help='.wld path')
     p.add_argument('-v', '--verbose', action='store_true')

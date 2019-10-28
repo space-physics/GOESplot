@@ -1,3 +1,1 @@
-include LICENSE
 recursive-include data *.wld
-recursive-include tests *.py *.jpg

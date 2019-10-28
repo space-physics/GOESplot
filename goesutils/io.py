@@ -10,6 +10,7 @@ import concurrent.futures
 import requests
 import ftplib
 import logging
+
 try:
     import netCDF4
 except ImportError:
@@ -24,7 +25,7 @@ def datetimerange(start: datetime, stop: datetime, step: timedelta) -> List[date
     """
     generates range of datetime start,stop,step just like range() for datetime
     """
-    return [start + i*step for i in range((stop-start) // step)]
+    return [start + i * step for i in range((stop - start) // step)]
 
 
 def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> Tuple[np.ndarray, np.ndarray]:
@@ -39,13 +40,13 @@ def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> Tuple[np.ndarray, n
 
     ny, nx = nxy
 
-    lat = np.arange(wld[5]-wld[3] + ny*wld[3], wld[5]-wld[3], -wld[3])
-    lon = np.arange(wld[4], wld[4]+nx*wld[0], wld[0])
+    lat = np.arange(wld[5] - wld[3] + ny * wld[3], wld[5] - wld[3], -wld[3])
+    lon = np.arange(wld[4], wld[4] + nx * wld[0], wld[0])
 
     return lat, lon
 
 
-def load(fn: Path, downsample: int=None, wld: Path=None) -> xarray.DataArray:
+def load(fn: Path, downsample: int = None, wld: Path = None) -> xarray.DataArray:
     """ for now this is single file at a time, but is trivial to extend to multi-files"""
     if fn.suffix == '.jpg':
         img = loadpreview(fn, wld)
@@ -59,7 +60,7 @@ def load(fn: Path, downsample: int=None, wld: Path=None) -> xarray.DataArray:
     return img
 
 
-def loadpreview(fn: Path, wld: Path=None) -> xarray.DataArray:
+def loadpreview(fn: Path, wld: Path = None) -> xarray.DataArray:
     """
     loads and modifies GOES image
     """
@@ -70,13 +71,12 @@ def loadpreview(fn: Path, wld: Path=None) -> xarray.DataArray:
 
     lat, lon = wld2mesh(wld, fn.stem.split('-')[1].upper(), img.shape[:2])
 
-    img = xarray.DataArray(img, dims=['lon', 'lat', 'color'],
-                           coords={'lon': lon, 'lat': lat, 'color': ['R', 'G', 'B']})
+    img = xarray.DataArray(img, dims=['lon', 'lat', 'color'], coords={'lon': lon, 'lat': lat, 'color': ['R', 'G', 'B']})
 
     return img
 
 
-def loadhires(fn: Path, downsample: int=None) -> xarray.DataArray:
+def loadhires(fn: Path, downsample: int = None) -> xarray.DataArray:
     """
     loads and modifies GOES data
     """
@@ -90,17 +90,17 @@ def loadhires(fn: Path, downsample: int=None) -> xarray.DataArray:
 
         mask = lon > 180
 
-        img = xarray.DataArray(np.flipud(f['data'][0, ::downsample, ::downsample]),
-                               dims=['x', 'y'],
-                               coords={'lon': (['x', 'y'], lon),
-                                       'lat': (['x', 'y'], lat)},
-                               attrs={'time': t, 'mask': mask})
+        img = xarray.DataArray(
+            np.flipud(f['data'][0, ::downsample, ::downsample]),
+            dims=['x', 'y'],
+            coords={'lon': (['x', 'y'], lon), 'lat': (['x', 'y'], lat)},
+            attrs={'time': t, 'mask': mask},
+        )
 
     return img
 
 
-def get_hires(host: str, ftpdir: str, flist: List[str],
-              odir: Path, clobber: bool=False):
+def get_hires(host: str, ftpdir: str, flist: List[str], odir: Path, clobber: bool = False):
     """download hi-res GOES data over FTP"""
 
     odir = Path(odir).expanduser()
@@ -150,6 +150,8 @@ def parse_email(txtfn: Path) -> Tuple[str, List[str]]:
                 ftpdir = L.split(' ')[-1]
 
     return ftpdir, flist
+
+
 # %% preview
 
 
@@ -161,7 +163,7 @@ def get_preview(odir: Path, start: datetime, stop: datetime, goessat: int, goesm
         start = parse(start)
     if isinstance(stop, str):
         stop = parse(stop)
-# %% GOES 3-hour previews
+    # %% GOES 3-hour previews
     tgoes = datetimerange(start, stop, timedelta(hours=3))
     print('downloading', len(tgoes), 'files to', odir)
 
@@ -183,24 +185,24 @@ def dl_goes(t: datetime, outdir: Path, goes: int, mode: str):
     dgoes = f'{t.year}-{t.month:02d}-{t.day:02d}-{t.hour:02d}'
 
     fn = outdir / f"goes{goes:d}-{mode}-{dgoes}.jpg"
-    url = (f'{STEM}{goes}/{mode}/' + dgoes)
+    url = f'{STEM}{goes}/{mode}/' + dgoes
 
     urlretrieve(url, fn)
 
 
-def urlretrieve(url: str, fn: Path, overwrite: bool=False):
+def urlretrieve(url: str, fn: Path, overwrite: bool = False):
     """
     the way urlretrieve should be with timeout
     """
     if not overwrite and fn.is_file() and fn.stat().st_size > 10000:
         print(f'SKIPPED {fn}')
         return
-# %% prepare to download
+    # %% prepare to download
     R = requests.head(url, allow_redirects=True, timeout=10)
     if R.status_code != 200:
         logging.error(f'{url} not found. \n HTTP ERROR {R.status_code}')
         return
-# %% download
+    # %% download
     print(f'downloading {int(R.headers["Content-Length"])//1000000} MBytes:  {fn.name}')
     R = requests.get(url, allow_redirects=True, timeout=10)
     with fn.open('wb') as f:
