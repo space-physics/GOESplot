@@ -5,11 +5,8 @@ git:
   depth: 25
   quiet: true
 
-os:
-- linux
-
 install:
-- pip install -e .[test,io]
+- pip install -e .[test,io,lint]
 
 script:
 - flake8
