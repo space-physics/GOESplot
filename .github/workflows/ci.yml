@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+    paths:
+      - "**.py"
+      - .github/workflows/ci.yml
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.8'
+
+    - run: pip install .[tests,lint,io]
+
+    - run: flake8
+    - run: mypy .
+
+    - run: pytest

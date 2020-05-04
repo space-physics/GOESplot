@@ -6,21 +6,21 @@
    Copy from the "cd ..." command through all the "get ..." commands
 4. Load and process that text file with this program.
 """
-import goesutils
+import goesplot as gq
 from argparse import ArgumentParser
 
 
 def main():
     p = ArgumentParser()
-    p.add_argument('txtfn', help='text file copied from CLASS email')
-    p.add_argument('outdir', help='place to write the files')
-    p.add_argument('-host', help='FTP host', default='ftp.class.ngdc.noaa.gov')
+    p.add_argument("txtfn", help="text file copied from CLASS email")
+    p.add_argument("outdir", help="place to write the files")
+    p.add_argument("-host", help="FTP host", default="ftp.class.ngdc.noaa.gov")
     p = p.parse_args()
 
-    ftpdir, flist = goesutils.parse_email(p.txtfn)
+    ftpdir, flist = gq.parse_email(p.txtfn)
 
-    goesutils.get_hires(p.host, ftpdir, flist, p.outdir)
+    gq.get_hires(p.host, ftpdir, flist, p.outdir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

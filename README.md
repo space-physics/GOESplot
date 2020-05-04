@@ -1,13 +1,12 @@
-# GOES Utilities
+# GOES Plot
 
-[![Build Status](https://travis-ci.com/space-physics/GOESutils.svg?branch=master)](https://travis-ci.com/space-physics/GOESutils)
-[![Build status](https://ci.appveyor.com/api/projects/status/ork0ny0prr1h8hen?svg=true)](https://ci.appveyor.com/project/space-physics/goesutils)
-[![PyPi version](https://img.shields.io/pypi/pyversions/goesutils.svg)](https://pypi.python.org/pypi/goesutils)
-[![PyPi Download stats](http://pepy.tech/badge/goesutils)](http://pepy.tech/project/goesutils)
+![Actions Status](https://github.com/space-physics/goesplot/workflows/ci/badge.svg)
+[![PyPi version](https://img.shields.io/pypi/pyversions/goesplot.svg)](https://pypi.python.org/pypi/goesplot)
+[![PyPi Download stats](http://pepy.tech/badge/goesplot)](http://pepy.tech/project/goesplot)
 
 Quick Python script to download and plot GOES satellite preview and hi-resolution data by date/time.
 
-![goesutils7 absorption](tests/goes13-IR-2017-07-13-12.jpg)
+![goes absorption](tests/goes13-IR-2017-07-13-12.jpg)
 
 ## Install
 
