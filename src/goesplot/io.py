@@ -84,7 +84,8 @@ def loadhires(fn: Path, downsample: int = None) -> xarray.DataArray:
         raise ImportError("netCDF4 needed for hires data.   pip install netcdf4")
 
     with netCDF4.Dataset(fn, "r") as f:
-        t = datetime.utcfromtimestamp(f["time"][:])
+
+        t = datetime.utcfromtimestamp(f["time"][()].item())
         lon = np.flipud(f["lon"][::downsample, ::downsample])
         lat = np.flipud(f["lat"][::downsample, ::downsample])
 

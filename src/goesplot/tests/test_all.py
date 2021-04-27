@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import pytest
 from pathlib import Path
 
@@ -18,7 +17,3 @@ def test_load_hires():
     img = gq.load(R / "goes13.2017.233.080017.BAND_02.nc")
 
     assert img.shape == (1100, 2500)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
