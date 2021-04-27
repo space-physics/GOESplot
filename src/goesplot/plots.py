@@ -45,10 +45,10 @@ def plotgoes(img: xarray.DataArray, verbose: bool = False):
     fg.colorbar(h, ax=ax)
 
     if False:
-        for l in labels:
-            ax.plot(l[0], l[1], "bo", markersize=7, transform=PC)
+        for lb in labels:
+            ax.plot(lb[0], lb[1], "bo", markersize=7, transform=PC)
             # only for rectangular systems
-            ax.annotate(l[2], xy=(l[0], l[1]), xytext=(3, 3), textcoords="offset points", transform=PC)
+            ax.annotate(lb[2], xy=(lb[0], lb[1]), xytext=(3, 3), textcoords="offset points", transform=PC)
 
         # only for rectangular systems
         ax.set_xticks(range(-140, -20, 20))
@@ -59,7 +59,7 @@ def plotgoes(img: xarray.DataArray, verbose: bool = False):
 
 
 def plotlatlon(img: np.ndarray, lat: np.ndarray, lon: np.ndarray, fn: str):
-    """ Lat / long grid plots """
+    """Lat / long grid plots"""
 
     PTYPE = "contour"
 

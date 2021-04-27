@@ -1,1 +1,1 @@
-recursive-include geosplot/data *.wld
+recursive-include src/goesplot/data *.wld

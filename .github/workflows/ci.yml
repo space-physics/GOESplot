@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v2
       with:
         python-version: '3.8'
 
     - run: pip install .[tests,lint,io]
 
     - run: flake8
-    - run: mypy .
+    - run: mypy
 
     - run: pytest

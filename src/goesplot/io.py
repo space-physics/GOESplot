@@ -47,7 +47,7 @@ def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> Tuple[np.ndarray, n
 
 
 def load(fn: Path, downsample: int = None, wld: Path = None) -> xarray.DataArray:
-    """ for now this is single file at a time, but is trivial to extend to multi-files"""
+    """for now this is single file at a time, but is trivial to extend to multi-files"""
     if fn.suffix == ".jpg":
         img = loadpreview(fn, wld)
     elif fn.suffix == ".nc":
