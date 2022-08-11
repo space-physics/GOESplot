@@ -1,7 +1,6 @@
 from matplotlib.pyplot import figure
 import cartopy
 import xarray
-import numpy as np
 from numpy.ma import masked_where
 
 PC = cartopy.crs.PlateCarree()
@@ -58,7 +57,7 @@ def plotgoes(img: xarray.DataArray, verbose: bool = False):
         plotlatlon(im, lat, lon, img.filename)
 
 
-def plotlatlon(img: np.ndarray, lat: np.ndarray, lon: np.ndarray, fn: str):
+def plotlatlon(img, lat, lon, fn: str):
     """Lat / long grid plots"""
 
     PTYPE = "contour"

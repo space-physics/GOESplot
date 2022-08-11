@@ -1,25 +1,23 @@
 # GOES Plot
 
 ![Actions Status](https://github.com/space-physics/goesplot/workflows/ci/badge.svg)
-[![PyPi version](https://img.shields.io/pypi/pyversions/goesplot.svg)](https://pypi.python.org/pypi/goesplot)
 [![PyPi Download stats](http://pepy.tech/badge/goesplot)](http://pepy.tech/project/goesplot)
 
 Quick Python script to download and plot GOES satellite preview and hi-resolution data by date/time.
 
 ![goes absorption](tests/goes13-IR-2017-07-13-12.jpg)
 
-## Install
 
-    python -m pip install -e .
-
-## Usage
+```sh
+python -m pip install -e .
+```
 
 The scripts work with two types of data:
 
 * [preview .jpg](https://www.ncdc.noaa.gov/gibbs/), 3 hour cadence
 * [full fidelity NetCDF4](https://www.class.ncdc.noaa.gov/saa/products/welcome), 1 minute cadence
 
-### Full fidelity data
+Full fidelity data:
 
 Select data using GOES
 [shopping cart](https://www.class.ncdc.noaa.gov/saa/products/shopping_cart_upd).
@@ -32,25 +30,33 @@ It may take up to 48 hours to get access to your order.
 NOAA CLASS emails you when data is ready.
 Each 5-10 minute set of multi-band data is several hundred megabytes at full resolution.
 
-### Preview (3 hour cadence)
+Preview (3 hour cadence):
 
-1. Get [GOES preview imagedata](https://www.ncdc.noaa.gov/gibbs/) with parallel download:
-   ```sh
-   python get-goes-preview.py goesnum start stop outdir
-   ```
-   example: download IR from GOES-13 2018-01-01 to 2018-01-02 to `~/data/goes13`:
-   ```sh
-   python get-goes-preview.py 13 IR 2018-01-01T00 2018-01-03T00 ~/data/goes13
-   ```
-   These are updated every 3 hours.
-   For science use, you'll want the
-   [full fidelity GOES data](https://www.class.ncdc.noaa.gov/saa/products/welcome)
-   updated on minutely timescale.
-2. Plot GOES IR data georegistered via Cartopy:
-   ```sh
-   python plot-goes.py ~/data/goes13
-   ```
-   Plot a specific file:
-   ```sh
-   python plot-goes.py ~/data/goes13/2018-01-01T12:35:00.jpg
-   ```
+Get [GOES preview imagedata](https://www.ncdc.noaa.gov/gibbs/) with parallel download:
+
+```sh
+python get-goes-preview.py goesnum start stop outdir
+```
+
+example: download IR from GOES-13 2018-01-01 to 2018-01-02 to `~/data/goes13`:
+
+```sh
+python get-goes-preview.py 13 IR 2018-01-01T00 2018-01-03T00 ~/data/goes13
+```
+
+These are updated every 3 hours.
+For science use, the
+[full fidelity GOES data](https://www.class.ncdc.noaa.gov/saa/products/welcome)
+are updated on minutely timescale.
+
+Plot GOES IR data georegistered via Cartopy:
+
+```sh
+python plot-goes.py ~/data/goes13
+```
+
+Plot a specific file:
+
+```sh
+python plot-goes.py ~/data/goes13/2018-01-01T12:35:00.jpg
+```

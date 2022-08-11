@@ -1,8 +1,10 @@
+from __future__ import annotations
+from typing import Optional
+
 from datetime import datetime, timedelta
-import imageio
+import imageio.v3 as iio
 import numpy as np
 from pathlib import Path
-from typing import Tuple, Optional, List
 import xarray
 from time import sleep
 from dateutil.parser import parse
@@ -21,14 +23,14 @@ STEM = "GOES_EAST_"  # FIXME: make auto per satellite
 R = Path(__file__).parent / "data"
 
 
-def datetimerange(start: datetime, stop: datetime, step: timedelta) -> List[datetime]:
+def datetimerange(start: datetime, stop: datetime, step: timedelta) -> list[datetime]:
     """
     generates range of datetime start,stop,step just like range() for datetime
     """
     return [start + i * step for i in range((stop - start) // step)]
 
 
-def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> Tuple[np.ndarray, np.ndarray]:
+def wld2mesh(wdir: Optional[Path], inst: str, nxy: tuple) -> tuple:
     """converts .wld to lat/lon mesh for Cartopy/Matplotlib plots
     assumes the .wld file is EPSG:4326 coordinates (WGS84)
     """
@@ -65,7 +67,7 @@ def loadpreview(fn: Path, wld: Path = None) -> xarray.DataArray:
     loads and modifies GOES image
     """
 
-    img = imageio.imread(fn)
+    img = iio.imread(fn)
 
     assert img.ndim == 3 and img.shape[2] == 3, "unexpected GOES image format"
 
@@ -101,7 +103,7 @@ def loadhires(fn: Path, downsample: int = None) -> xarray.DataArray:
     return img
 
 
-def get_hires(host: str, ftpdir: str, flist: List[str], odir: Path, clobber: bool = False):
+def get_hires(host: str, ftpdir: str, flist: list[str], odir: Path, clobber: bool = False):
     """download hi-res GOES data over FTP"""
 
     odir = Path(odir).expanduser()
@@ -136,7 +138,7 @@ def get_hires(host: str, ftpdir: str, flist: List[str], odir: Path, clobber: boo
             sleep(0.5)  # anti-leech
 
 
-def parse_email(txtfn: Path) -> Tuple[str, List[str]]:
+def parse_email(txtfn: Path) -> tuple[str, list[str]]:
     """Parse GOES hi-res file list from email"""
     txtfn = Path(txtfn).expanduser()
 
